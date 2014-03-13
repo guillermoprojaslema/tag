@@ -18,6 +18,7 @@ var cheerio = require('cheerio'); 	/* Librería encargada de hacer el scrap */
 /*
 	Página de consulta para multas por tag
 */
+
 urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 	method: 'POST',
 	data: {ppu: 'CDSR70'} 
@@ -32,11 +33,12 @@ urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 	else
 		//TODO Manejador de error.
 		throw err;
-});
+}); 
 
 /*
 	Página de consulta para Carabineros de Chile
 */
+
 urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 	method: 'POST',
 	data: { accion : 'buscar' , txtLetras: 'CD', txtNumeros1: 'SR', txtNumeros2: '70', vin : ''} 
@@ -57,18 +59,18 @@ urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 /*
 	Página de consulta para planta de revisión técnica
 */
-/*urllib.request('http://www.prt.cl/Paginas/RevisionTecnica.aspx', {
+urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 	method: 'POST',
 	data: {ppu: 'CDSR70'} 
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
-		$('#form1').each(function() {
-			console.log($(this).text()); 				// Esta función imprime sólo el texto, No entiendo por qué no funciona.
+		$('*').each(function() {
+			console.log($(this).text()); 				// Esta función imprime sólo el texto, nada de html ni metadatos.
 			// console.log($(this).toString());			// Esta función imprime todo el html, segregado por el selector.
 		});
 	}
 	else
 		//TODO Manejador de error.
 		throw err;
-});*/ 
+});
