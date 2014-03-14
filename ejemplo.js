@@ -1,5 +1,32 @@
+/* Librerías y Dependencias */
+
 var urllib = require('urllib'); 	/* Librería encargada de hacer las peticiones */
 var cheerio = require('cheerio'); 	/* Librería encargada de hacer el scrap */
+var express = require('express');
+var swig = require('swig');
+
+/*Instanciación del servidor, por ahora en localhost*/
+
+var server = express();
+
+
+// Configuración para renderiar vistas
+
+server.engine('html', swig.renderFile);
+server.set('view engine', 'html');
+server.set('views', './app/views');
+
+
+
+
+
+
+/* Vista de un home "localhost/Home" */
+
+server.get('/', function (req, res){
+	res.render('home');
+});
+
 
 /**
 
@@ -13,7 +40,11 @@ var cheerio = require('cheerio'); 	/* Librería encargada de hacer el scrap */
  *					clave y valor como <nombre id del input> : <Valor a consultar>
  *@param function	ANONYMOUS FUNCTION: Permite conocer el estado de la web. Si ésta 
  *					está arriba, recibiremos el <body> como respuesta 
+ *@string ppu		Estándar para referirse a las patentes de vehículos motorizados en Chile
+ 					autos ABCD30 ó AB1234 motos AB0123
+ *@string vin		Número único del vehículo (chasis). Más info en http://es.wikipedia.org/wiki/N%C3%BAmero_de_chasis
  */
+
 
 /*
 	Página de consulta para multas por tag
@@ -21,7 +52,7 @@ var cheerio = require('cheerio'); 	/* Librería encargada de hacer el scrap */
 
 urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 	method: 'POST',
-	data: {ppu: 'CDSR70'} 
+	data: {ppu: 'FKKV71'} 
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
@@ -41,7 +72,7 @@ urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 
 urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 	method: 'POST',
-	data: { accion : 'buscar' , txtLetras: 'CD', txtNumeros1: 'SR', txtNumeros2: '70', vin : ''} 
+	data: { accion : 'buscar' , txtLetras: 'FK', txtNumeros1: 'KV', txtNumeros2: '71', vin : ''} 
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
@@ -61,7 +92,7 @@ urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 */
 urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 	method: 'POST',
-	data: {ppu: 'CDSR70'} 
+	data: {ppu: 'FKKV71'} 
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
@@ -74,3 +105,7 @@ urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 		//TODO Manejador de error.
 		throw err;
 });
+
+
+/*Salida a través del puerto 3000 */
+server.listen(3000);	
