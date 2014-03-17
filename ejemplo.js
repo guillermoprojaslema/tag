@@ -1,15 +1,15 @@
 /* Librerías y Dependencias */
 
-var urllib = require('urllib'); 	/* Librería encargada de hacer las peticiones */
+var urllib 	= require('urllib'); 	/* Librería encargada de hacer las peticiones */
 var cheerio = require('cheerio'); 	/* Librería encargada de hacer el scrap */
-var express = require('express');
-var swig = require('swig');
-var path = require('path');
-var fs = require('fs');
+var express = require('express');	/* Librería encargada de levantar un server */
+var swig 	= require('swig');		/* Librería encargada de los folders (?) */
+var path 	= require('path');		/* Librería encargada de revisar rutas (?) */
+var fs 		= require('fs');		/* Librería encargada de hacer sepa Moya */
 
 /*Instanciación del servidor, por ahora en localhost*/
 
-var server = express();
+/* var server = express();
 
 
 // Configuración para renderiar vistas
@@ -24,11 +24,11 @@ server.set('views', path.join(
 
 
 
-/* Vista de un home "localhost/Home" */
+//  Vista de un home "localhost/Home" 
 
 server.get('/', function (req, res){
 	res.render('home');
-});
+}); */
 
 
 /**
@@ -55,18 +55,18 @@ server.get('/', function (req, res){
 
 urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 	method: 'POST',
-	data: {ppu: 'FKKV71'}
+	data: {ppu: 'CDSR70'}
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
-		$('#TabbedPanels1').each(function() {
+		$('#menuTable').each(function() {
 			console.log($(this).text().trim()); 		// Esta función imprime sólo el texto, nada de html ni metadatos.
 			//console.log($(this).toString());			// Esta función imprime todo el html, segregado por el selector.
 		});
 	}
 	else
 		//TODO Manejador de error.
-		throw err;
+		return console.error(err);
 });
 
 /*
@@ -75,40 +75,58 @@ urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 
 urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 	method: 'POST',
-	data: { accion : 'buscar' , txtLetras: 'FK', txtNumeros1: 'KV', txtNumeros2: '71', vin : ''}
+	data: { accion : 'buscar' , txtLetras: 'CD', txtNumeros1: 'SR', txtNumeros2: '70', vin : ''}
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
-		$('#patente').each(function() {
+		
+		console.log('¿Presenta encargo?');
+
+
+		$('#patente label').each(function() {
 			console.log($(this).text()); 		// Esta función imprime sólo el texto, nada de html ni metadatos.
 			// console.log($(this).toString());	// Esta función imprime todo el html, segregado por el selector.
 		});
 	}
 	else
 		//TODO Manejador de error.
-		throw err;
+		return console.error(err);
 });
 
 
 /*
 	Página de consulta para planta de revisión técnica
 */
+
 urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 	method: 'POST',
-	data: {ppu: 'FKKV71'}
+	data: {ppu: 'CDSR70'}
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
-		$('*').each(function() {
+
+		/* Acá elimino los tags innecesarios, para que dejen de aparecer esos ceros huachos */
+
+		$("codigoPRT").remove();
+
+		$('MttVehiculoTO').each(function() {
 			console.log($(this).text()); 				// Esta función imprime sólo el texto, nada de html ni metadatos.
 			// console.log($(this).toString());			// Esta función imprime todo el html, segregado por el selector.
+
+			// AB0805 		Código de planta.
+			// E7408542 	n° de certificado.
+			// N° Motor 	9C510994
+			// N° Chasis 	1J8GR48K39C510994
+
+
 		});
 	}
 	else
 		//TODO Manejador de error.
-		throw err;
+		return console.error(err);
 });
 
 
+
 /*Salida a través del puerto 3000 */
-server.listen(3000);
+// server.listen(3000); 
