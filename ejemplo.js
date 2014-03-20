@@ -1,34 +1,19 @@
 /* Librerías y Dependencias */
 
-var urllib 	= require('urllib'); 	/* Librería encargada de hacer las peticiones */
-var cheerio = require('cheerio'); 	/* Librería encargada de hacer el scrap */
-var express = require('express');	/* Librería encargada de levantar un server */
-var swig 	= require('swig');		/* Librería encargada de los folders (?) */
-var path 	= require('path');		/* Librería encargada de revisar rutas (?) */
-var fs 		= require('fs');		/* Librería encargada de hacer sepa Moya */
+var urllib 		= require('urllib'); 	/* Librería encargada de hacer las peticiones */
+var cheerio	 	= require('cheerio'); 	/* Librería encargada de hacer el scrap */
+var express	 	= require('express');	/* Librería encargada de levantar un server */
+var swig 		= require('swig');		/* Librería encargada de los folders (?) */
+var path 		= require('path');		/* Librería encargada de revisar rutas (?) */
+var fs 			= require('fs');		/* Librería encargada de hacer sepa Moya */
+var parser 		= require('xml2json');	/*Librería para convertir los xml en json */
 
 /*Instanciación del servidor, por ahora en localhost*/
 
-/* var server = express();
+var server = express();
 
 
-// Configuración para renderiar vistas
-
-server.engine('html', swig.renderFile);
-server.set('view engine', 'html');
-server.set('views', path.join(
-    path.dirname(fs.realpathSync(__filename)), 'app/views'));
-
-
-
-
-
-
-//  Vista de un home "localhost/Home" 
-
-server.get('/', function (req, res){
-	res.render('home');
-}); */
+//Configuración para renderiar vistas
 
 
 /**
@@ -51,7 +36,9 @@ server.get('/', function (req, res){
 
 /*
 	Página de consulta para multas por tag
-*/
+ */
+
+console.log('Multas por tag');
 
 urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 	method: 'POST',
@@ -60,8 +47,9 @@ urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
 		$('#menuTable').each(function() {
-			console.log($(this).text().trim()); 		// Esta función imprime sólo el texto, nada de html ni metadatos.
-			//console.log($(this).toString());			// Esta función imprime todo el html, segregado por el selector.
+			var xml = ($(this).toString());
+			var json = parser.toJson(xml);
+			console.log(json);
 		});
 	}
 	else
@@ -71,21 +59,20 @@ urllib.request('http://www.tagchile.cl/pista3/consulta_denuncia.php', {
 
 /*
 	Página de consulta para Carabineros de Chile
-*/
+ */
 
 urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 	method: 'POST',
-	data: { accion : 'buscar' , txtLetras: 'CD', txtNumeros1: 'SR', txtNumeros2: '70', vin : ''}
+	data: { accion : 'buscar' , txtLetras: 'CZ', txtNumeros1: 'PD', txtNumeros2: '15', vin : ''}
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
-		
 		console.log('¿Presenta encargo?');
+		$('#patente label tr').each(function() {
 
-
-		$('#patente label').each(function() {
-			console.log($(this).text()); 		// Esta función imprime sólo el texto, nada de html ni metadatos.
-			// console.log($(this).toString());	// Esta función imprime todo el html, segregado por el selector.
+			var xml = ($(this).toString());
+			var json = parser.toJson(xml);
+			console.log(json);
 		});
 	}
 	else
@@ -96,7 +83,7 @@ urllib.request('http://consultawebvehiculos.carabineros.cl/index.php', {
 
 /*
 	Página de consulta para planta de revisión técnica
-*/
+ */
 
 urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 	method: 'POST',
@@ -104,20 +91,15 @@ urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 }, function(err, data, res) {
 	if(!err && res.statusCode == 200){
 		var $ = cheerio.load(data);
+		console.log('Revisiones Técnicas');
 
-		/* Acá elimino los tags innecesarios, para que dejen de aparecer esos ceros huachos */
-
-		$("codigoPRT").remove();
-
+		/* Acá elimino los tags innecesarios, para que dejen de aparecer esos ceros y tag huachos */
+		$("codigoPRT").remove(); $("Nvin").remove();
 		$('MttVehiculoTO').each(function() {
-			console.log($(this).text()); 				// Esta función imprime sólo el texto, nada de html ni metadatos.
-			// console.log($(this).toString());			// Esta función imprime todo el html, segregado por el selector.
 
-			// AB0805 		Código de planta.
-			// E7408542 	n° de certificado.
-			// N° Motor 	9C510994
-			// N° Chasis 	1J8GR48K39C510994
-
+			var xml = ($(this).toString());
+			var json = parser.toJson(xml);
+			console.log(json);
 
 		});
 	}
@@ -127,6 +109,3 @@ urllib.request('http://www.prt.cl/infovehiculomttwsNew.asmx/infoVehiculoMTT', {
 });
 
 
-
-/*Salida a través del puerto 3000 */
-// server.listen(3000); 
